@@ -12,8 +12,7 @@ class CityListViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     private let searchController = UISearchController(searchResultsController: nil)
     private var filteredCities = [City]()
-    
-    var cities: [City] = [City]()
+    private var cities: [City] = [City]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +24,7 @@ class CityListViewController: UIViewController {
     
     private func setUpSearchController() {
         searchController.dimsBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search Cities"
         definesPresentationContext = true
         if #available(iOS 11.0, *) {
             navigationItem.searchController = searchController
@@ -66,19 +66,19 @@ class CityListViewController: UIViewController {
         }
     }
     
-    func search(cities: [City], searchText: String) -> [City] {
+    func search(searchText: String) -> [City] {
         return (cities.filter({ ($0.name.lowercased().hasPrefix(searchText.lowercased())) }))
     }
 }
 
 extension CityListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        filteredCities = search(cities: cities, searchText: searchText)
+        filteredCities = search(searchText: searchText)
         tableView.reloadData()
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        filteredCities = search(cities: cities, searchText: "")
+        filteredCities = search(searchText: "")
         tableView.reloadData()
     }
 }

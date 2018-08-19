@@ -10,27 +10,51 @@ import XCTest
 @testable import Cities
 
 class CitiesTests: XCTestCase {
+    var cityList: CityListViewController?
     
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        cityList = CityListViewController()
+        cityList?.loadDataSource()
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        cityList = nil
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testSearchResultCountForAmsterdam() {
+        let result1: [City] = (cityList?.search(searchText: "Amsterdam"))!
+        XCTAssert(result1.count == 4)
     }
     
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+    func testSearchResultCountForBudapest() {
+        let result1: [City] = (cityList?.search(searchText: "Budapest"))!
+        XCTAssert(result1.count == 24)
     }
     
+    func testSearchResultValuesForAracaju() {
+        let aracajuCoord = Coordinate(lat: -10.91111, lon: -37.071671)
+        let aracajuCity = City(_id: 3471872, country: "BR", name: "Aracaju", coord: aracajuCoord)
+        
+        let result2: [City] = (cityList?.search(searchText: "Aracaju"))!
+        XCTAssert(result2 == [aracajuCity])
+    }
+    
+    func testSearchResultValuesForAlaba() {
+        let alabaCoord1 = Coordinate(lat: 32.750408, lon: -86.750259)
+        let alabaCity1 = City(_id: 4829764, country: "US", name: "Alabama", coord: alabaCoord1)
+        
+        let alabaCoord2 = Coordinate(lat: 33.244282, lon: -86.816383)
+        let alabaCity2 = City(_id: 4829762, country: "US", name: "Alabaster", coord: alabaCoord2)
+        
+        let alabaCoord3 = Coordinate(lat: 14.10278, lon: 122.015282)
+        let alabaCity3 = City(_id: 1731749, country: "PH", name: "Alabat", coord: alabaCoord3)
+        
+        let alabaCoord4 = Coordinate(lat: 45.26667, lon: 34.133331)
+        let alabaCity4 = City(_id: 713724, country: "UA", name: "Alabash Konrat", coord: alabaCoord4)
+        
+        let result2: [City] = (cityList?.search(searchText: "Alaba"))!
+        XCTAssert(result2 == [alabaCity1, alabaCity2, alabaCity3, alabaCity4].sorted(by: { $0.name < $1.name }))
+    }
 }
