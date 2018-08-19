@@ -13,7 +13,4 @@ struct City: Decodable {
     let country: String
     let name: String
     let coord: Coordinate
-    var customName: String? {
-        return name + ", " + country
-    }
 }

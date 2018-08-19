@@ -11,14 +11,16 @@ import UIKit
 class CityListViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     private let searchController = UISearchController(searchResultsController: nil)
-    private var cities: [City] = [City]()
     private var filteredCities = [City]()
+    
+    var cities: [City] = [City]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.addNavBarImage()
-        self.loadDataSource()
         self.setUpSearchController()
+        self.loadDataSource()
+        tableView.reloadData()
     }
     
     private func setUpSearchController() {
@@ -46,33 +48,37 @@ class CityListViewController: UIViewController {
         navigationItem.titleView = imageView
     }
     
-    private func loadDataSource() {
+    func loadDataSource() {
         if let path = Bundle.main.path(forResource: "cities", ofType: "json") {
             do {
                 let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
-                let result = try JSONDecoder().decode([City].self, from: data)
-                cities = result
-                cities = cities.sorted(by: { $0.customName! < $1.customName! })
-                for c in cities {
-                    print(c.customName ?? "")
-                }
+                cities = try JSONDecoder().decode([City].self, from: data)
+                
+                // Sort cities in alphabetical order by name
+                cities = cities.sorted(by: { $0.name < $1.name })
+                
                 filteredCities = cities
-                tableView.reloadData()
             } catch {
-                // handle error
+                let alert = UIAlertController(title: "Error", message: "Something went wrong when reading the city list. Please, try to run the app again.", preferredStyle: UIAlertControllerStyle.alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert, animated: true, completion: nil)
             }
         }
+    }
+    
+    func search(cities: [City], searchText: String) -> [City] {
+        return (cities.filter({ ($0.name.lowercased().hasPrefix(searchText.lowercased())) }))
     }
 }
 
 extension CityListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        filteredCities = (cities.filter({ ($0.customName?.lowercased().hasPrefix(searchText.lowercased()))! }))
+        filteredCities = search(cities: cities, searchText: searchText)
         tableView.reloadData()
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        filteredCities = (cities.filter({ ($0.customName?.lowercased().hasPrefix(""))! }))
+        filteredCities = search(cities: cities, searchText: "")
         tableView.reloadData()
     }
 }
@@ -85,7 +91,7 @@ extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cellReusableId")
         let city = filteredCities[indexPath.row]
-        cell?.textLabel?.text = city.customName
+        cell?.textLabel?.text = "\(city.name), \(city.country)"
         return cell!
     }
     

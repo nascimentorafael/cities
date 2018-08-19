@@ -38,7 +38,7 @@ class CityCoordinateViewController: UIViewController {
     }
     
     private func setUpNavBar() {
-        navigationItem.title = city?.customName
+        navigationItem.title = "\(city?.name ?? ""), \(city?.country ?? "")"
     }
     
     private func setUpMapView() {
