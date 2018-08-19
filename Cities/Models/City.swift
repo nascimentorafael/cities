@@ -11,7 +11,7 @@ import Foundation
 struct City: Decodable {
     let _id: Int
     let country: String
-    let name: String
+    var name: String
     let coord: Coordinate
 }
 

@@ -11,7 +11,7 @@ import UIKit
 class CityListViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     private let searchController = UISearchController(searchResultsController: nil)
-    private var filteredCities = [City]()
+    private var displayedCities = [City]()
     private var cities: [City] = [City]()
     
     override func viewDidLoad() {
@@ -49,20 +49,20 @@ class CityListViewController: UIViewController {
     }
     
     func loadDataSource() {
-        if let path = Bundle.main.path(forResource: "cities", ofType: "json") {
-            do {
-                let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
-                cities = try JSONDecoder().decode([City].self, from: data)
-                
-                // Sort cities in alphabetical order by name
-                cities = cities.sorted(by: { $0.name < $1.name })
-                
-                filteredCities = cities
-            } catch {
-                let alert = UIAlertController(title: "Error", message: "Something went wrong when reading the city list. Please, try to run the app again.", preferredStyle: UIAlertControllerStyle.alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(alert, animated: true, completion: nil)
-            }
+        do {
+            cities = try DataSourceManager.loadDataSource()
+            
+            // Parse city names
+            cities = DataSourceManager.parseData(cities: cities)
+            
+            // Sort cities in alphabetical order by name
+            cities = cities.sorted(by: { $0.name < $1.name })
+            
+            displayedCities = cities
+        } catch {
+            let alert = UIAlertController(title: "Error", message: "Something went wrong when reading the city list. Please, try to run the app again.", preferredStyle: UIAlertControllerStyle.alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -73,30 +73,30 @@ class CityListViewController: UIViewController {
 
 extension CityListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        filteredCities = search(searchText: searchText)
+        displayedCities = search(searchText: searchText)
         tableView.reloadData()
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        filteredCities = search(searchText: "")
+        displayedCities = search(searchText: "")
         tableView.reloadData()
     }
 }
 
 extension CityListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredCities.count
+        return displayedCities.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cellReusableId")
-        let city = filteredCities[indexPath.row]
+        let city = displayedCities[indexPath.row]
         cell?.textLabel?.text = "\(city.name), \(city.country)"
         return cell!
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let city = filteredCities[indexPath.row]
+        let city = displayedCities[indexPath.row]
         let cityCoodVC: CityCoordinateViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "CityCoordinateVC") as! CityCoordinateViewController
         cityCoodVC.city = city
         navigationController?.pushViewController(cityCoodVC, animated: true)
