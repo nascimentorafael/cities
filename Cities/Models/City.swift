@@ -12,6 +12,7 @@ struct City: Decodable {
     let _id: Int
     let country: String
     var name: String
+    var lowercasedName: String?
     let coord: Coordinate
 }
 

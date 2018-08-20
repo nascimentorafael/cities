@@ -67,13 +67,13 @@ class CityListViewController: UIViewController {
     }
     
     func search(searchText: String) -> [City] {
-        return (cities.filter({ ($0.name.lowercased().hasPrefix(searchText.lowercased())) }))
+        return (cities.filter({ ($0.lowercasedName?.hasPrefix(searchText))! }))
     }
 }
 
 extension CityListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        displayedCities = search(searchText: searchText)
+        displayedCities = search(searchText: searchText.lowercased())
         tableView.reloadData()
     }
     

@@ -33,6 +33,9 @@ class DataSourceManager {
             }
             // Capitalize first letter
             newCity.name = newCity.name.capitalizingFirstLetter()
+            
+            // City to lower case used for optimised search
+            newCity.lowercasedName = newCity.name.lowercased()
             return newCity
         })
     }
