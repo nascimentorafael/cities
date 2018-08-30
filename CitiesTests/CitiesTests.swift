@@ -11,15 +11,19 @@ import XCTest
 
 class CitiesTests: XCTestCase {
     var cityList: CityListViewController?
+    var dataSourceManager: DataSourceManager?
     
     override func setUp() {
         super.setUp()
+        dataSourceManager = DataSourceManager(fileName: "cities")
         cityList = CityListViewController()
+        cityList?.dataSourceManager = dataSourceManager
         cityList?.loadDataSource()
     }
     
     override func tearDown() {
         cityList = nil
+        dataSourceManager = nil
         super.tearDown()
     }
     

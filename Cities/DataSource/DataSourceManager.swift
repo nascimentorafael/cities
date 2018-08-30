@@ -9,7 +9,44 @@
 import Foundation
 
 class DataSourceManager {
-    class func parseData(cities: [City]) -> [City] {
+    private let fileName: String
+
+    init(fileName: String) {
+        self.fileName = fileName
+    }
+
+    func getCities() -> [City]? {
+        var cities: [City]
+        do {
+            // Load cities from file
+            cities = (try self.loadDataSource())
+
+            // Parse city names
+            cities = (self.parseData(cities: cities))
+
+            // Sort cities in alphabetical order by name
+            cities = cities.sorted(by: { $0.name < $1.name })
+
+            return cities
+        } catch {
+            return nil
+        }
+    }
+
+    private func loadDataSource() throws -> [City] {
+        if let path = Bundle.main.path(forResource: fileName, ofType: "json") {
+            do {
+                let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
+                let result = try JSONDecoder().decode([City].self, from: data)
+                return result
+            } catch {
+                throw error
+            }
+        }
+        return []
+    }
+
+    private func parseData(cities: [City]) -> [City] {
         let removablePrefix = ["’", "‘", "'"]
         let replacablePrefix = ["Ð": "D", "Ł": "L", "Ø": "O", "Z̧": "Z", "Ž": "Z", "Ż": "Z", "Æ": "Ae", "Ħ": "H", "Œ": "Oe"]
         return cities.map({ city in
@@ -38,18 +75,5 @@ class DataSourceManager {
             newCity.lowercasedName = newCity.name.lowercased()
             return newCity
         })
-    }
-    
-    class func loadDataSource() throws -> [City] {
-        if let path = Bundle.main.path(forResource: "cities", ofType: "json") {
-            do {
-                let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
-                let result = try JSONDecoder().decode([City].self, from: data)
-                return result
-            } catch {
-                throw error
-            }
-        }
-        return []
     }
 }

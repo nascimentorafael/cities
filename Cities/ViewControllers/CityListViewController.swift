@@ -13,6 +13,7 @@ class CityListViewController: UIViewController {
     private let searchController = UISearchController(searchResultsController: nil)
     private var displayedCities = [City]()
     private var cities: [City] = [City]()
+    var dataSourceManager: DataSourceManager?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,21 +50,15 @@ class CityListViewController: UIViewController {
     }
     
     func loadDataSource() {
-        do {
-            cities = try DataSourceManager.loadDataSource()
-            
-            // Parse city names
-            cities = DataSourceManager.parseData(cities: cities)
-            
-            // Sort cities in alphabetical order by name
-            cities = cities.sorted(by: { $0.name < $1.name })
-            
-            displayedCities = cities
-        } catch {
+        guard let data = dataSourceManager?.getCities() else {
             let alert = UIAlertController(title: "Error", message: "Something went wrong when reading the city list. Please, try to run the app again.", preferredStyle: UIAlertControllerStyle.alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
+            return
         }
+
+        cities = data
+        displayedCities = data
     }
     
     func search(searchText: String) -> [City] {
@@ -73,8 +68,10 @@ class CityListViewController: UIViewController {
 
 extension CityListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        displayedCities = search(searchText: searchText.lowercased())
-        tableView.reloadData()
+        DispatchQueue.main.async {
+            self.displayedCities = self.search(searchText: searchText.lowercased())
+            self.tableView.reloadData()
+        }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
